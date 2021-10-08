@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 @app.route(config.qb_auth_slug)
 def authorization():
-    # check if user returned from the authorization page with the code
+    # Check if user returned from the authorization page with the code
     authCode = request.args.get('code')
     if authCode:
         # send the code to get the token
@@ -26,31 +26,7 @@ def authorization():
         }
         response = requests.post(f'https://oauth.platform.intuit.com/oauth2/v1/tokens/bearer', data=payload, headers=headers)
 
-        if 'variables.txt' not in os.listdir('.'):
-            variables = {
-                'shopify': {
-                    'last order id': 0,
-                },
-                'rekki': {
-                    'last order time': '2021-07-01T00:00:00.000000Z',
-                    'last orders': [],  # ids of the previous import
-                },
-                'marketman': {
-                    'last order time': None,
-                    'last orders': [],  # ids of the previous import
-                },
-                'notch': {
-                    'last orders': [],  # ids of the last 100 orders
-                },
-                'quickbooks': {
-                    'access token': '',
-                    'refresh token': '',
-                    'best before': datetime.datetime(2021, 7, 1, 0, 0, 0).isoformat(),  # UTC time
-                }
-            }
-        else:
-            variables = json.load(open('variables.txt', 'r'))
-
+        variables = json.load(open('variables.txt', 'r'))
         variables['quickbooks']['access token'] = response.json()['access_token']
         variables['quickbooks']['refresh token'] = response.json()['refresh_token']
         # Add almost an hour to account for slow requests speed:
