@@ -13,9 +13,8 @@ def get_orders(logger: getLogger, application_path: str) -> List:
     orders = []
     try:
         variables = json.load(open(os.path.join(application_path, 'variables.txt'), 'r'))
-        shop = config.shopify_store
-        url = f'https://{shop}.myshopify.com/admin/api/2021-04/orders.json'
-        headers = {'X-Shopify-Access-Token': config.shopify_token}
+        url = f'https://{config.shopify_store}.myshopify.com/admin/api/2021-04/orders.json'
+        headers = {'X-Shopify-Access-Token': config.shopify_password}
         params = {
             'status': 'open',
             'limit': 250,
@@ -30,7 +29,7 @@ def get_orders(logger: getLogger, application_path: str) -> List:
         # Continue requesting next pages if there are any
         while response.headers.get('Link'):
             url = response.headers.get('Link')
-            headers = {'X-Shopify-Access-Token': config.shopify_token}
+            headers = {'X-Shopify-Access-Token': config.shopify_password}
             params = {
                 'status': 'open',
                 'limit': 250,
