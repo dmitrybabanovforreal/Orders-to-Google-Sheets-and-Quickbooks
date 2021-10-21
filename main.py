@@ -46,7 +46,7 @@ ssData = google_sheets.get_sheet_data()
 for order in orders['shopify']:
     deliveryDateTime = shopify.get_delivery_dt(order)
     customerName = (order['customer']['first_name'] + ' ' + order['customer']['last_name']).strip()
-    for item in order['items']:
+    for item in order['line_items']:
         ssData = google_sheets.add_order_to_sheet_data(
             ss_data=ssData,
             delivery_dt=deliveryDateTime,
