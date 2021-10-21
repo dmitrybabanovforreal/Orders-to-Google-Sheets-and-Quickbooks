@@ -1,30 +1,34 @@
 import datetime
+import traceback
 from typing import List, Dict, Union
 
 import ezsheets
+from googleapiclient.errors import HttpError
 
 import config
 
 
-def get_sheet_data() -> Dict:
+def get_sheet_data(local_dt: datetime.datetime,) -> Dict:
     ss = ezsheets.Spreadsheet(config.google_sheet_id)  # Spreadsheet ID from its URL
     ss_data = {}
 
     for sheet in ss.sheets:
         # Remove the tabs older than today
         try:
-            if datetime.datetime.strptime(sheet.title, '%a, %b %d %Y') < localTime - datetime.timedelta(days=1):
-                sheet.delete()
-            else:
-                rows = []
-                # Get not empty rows only
-                for row in sheet.getRows():
-                    if True in (elem != '' for elem in row):
-                        rows.append(row)
-                ss_data[sheet.title] = rows
-        except:
+            sheet_title_dt = datetime.datetime.strptime(sheet.title, '%a, %b %d %Y')
+        except ValueError:
             # If sheet title is not a date, don't process it as all
             continue
+        if sheet_title_dt < local_dt.replace(tzinfo=None) - datetime.timedelta(days=2):
+            sheet.delete()
+        else:
+            rows = []
+            # Get not empty rows only
+            for row in sheet.getRows():
+                if True in (elem != '' for elem in row):
+                    rows.append(row)
+            ss_data[sheet.title] = rows
+
 
     return ss_data
 
@@ -87,7 +91,14 @@ def update_sheet_tabs(ss_data: Dict[str, List]) -> None:
     tabs_order.sort()
 
     # Remove old sheets and add new ones
-    ss.createSheet('[none]', 0)  # Create an empty sheet because you can't leave zero sheets
+    try:
+        ss.createSheet('[none]', 0)  # Create an empty sheet because you can't leave zero sheets
+    except HttpError:
+        if '"[none]" already exists' in traceback.format_exc():
+            pass
+        else:
+            raise Exception(traceback.format_exc())
+
     for sheet in ss.sheets[1:]:
         sheet.delete()
     len(ss.sheets)

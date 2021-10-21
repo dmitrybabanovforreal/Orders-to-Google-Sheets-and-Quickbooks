@@ -1,5 +1,6 @@
 from typing import List, Dict
 from logging import getLogger
+from dateutil import tz
 import json, os, traceback, datetime, csv
 
 import requests
@@ -63,4 +64,7 @@ def match_product_codes(orders: List, application_path: str) -> List:
 
 
 def get_delivery_dt(order: Dict) -> datetime.datetime:
-    return datetime.datetime.strptime(order['delivery_on'], '%Y-%m-%d')
+    return (datetime.datetime
+            .strptime(order['delivery_on'], '%Y-%m-%d')
+            .replace(tzinfo=tz.gettz('UTC'))
+            .astimezone(tz.gettz('America/Toronto')))

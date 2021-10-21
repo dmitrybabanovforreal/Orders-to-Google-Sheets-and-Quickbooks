@@ -40,7 +40,7 @@ orders['rekki'] = rekki.match_product_codes(orders=orders['rekki'], application_
 # todo Add the location information using the productLocation dictionary
 
 # Get the existing data from Google Sheets
-ssData = google_sheets.get_sheet_data()
+ssData = google_sheets.get_sheet_data(local_dt=localTime)
 
 # Add the orders with delivery date starting from today to the spreadsheet
 for order in orders['shopify']:

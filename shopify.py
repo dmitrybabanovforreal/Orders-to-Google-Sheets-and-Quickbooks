@@ -19,7 +19,7 @@ def get_orders(logger: getLogger, application_path: str) -> List:
             'status': 'open',
             'limit': 250,
             'since_id': variables['shopify']['last order id'],
-            'created_at_min': '2021-07-01T00:00:00-07:00'
+            'created_at_min': '2021-10-10T00:00:00-07:00'
         }
         response = requests.get(url, params=params, headers=headers)
         response.raise_for_status()
@@ -35,16 +35,10 @@ def get_orders(logger: getLogger, application_path: str) -> List:
                     break
 
             headers = {'X-Shopify-Access-Token': config.shopify_password}
-            params = {
-                'status': 'open',
-                'limit': 250,
-                'since_id': variables['shopify']['last order id'],
-                'created_at_min': '2021-07-01T00:00:00-07:00'
-            }
-            response = requests.get(url, params=params, headers=headers)
+            response = requests.get(url, headers=headers)
             response.raise_for_status()
 
-            orders.append(response.json()['orders'])
+            orders += response.json()['orders']
 
         logger.info(f'Shopify returned {str(len(orders))} orders')
 
