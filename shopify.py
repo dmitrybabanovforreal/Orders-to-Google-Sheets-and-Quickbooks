@@ -27,8 +27,13 @@ def get_orders(logger: getLogger, application_path: str) -> List:
         orders = response.json()['orders']
 
         # Continue requesting next pages if there are any
-        while response.headers.get('Link'):
-            url = response.headers.get('Link')
+        while '; rel="next"' in response.headers.get('Link', ''):
+            url_data = response.headers.get('Link')
+            for item in url_data.split(','):
+                if '; rel="next"' in item:
+                    url = item.split('; rel="next"')[0].strip(' <>')
+                    break
+
             headers = {'X-Shopify-Access-Token': config.shopify_password}
             params = {
                 'status': 'open',
